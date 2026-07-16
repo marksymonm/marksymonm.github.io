@@ -1,0 +1,36 @@
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: Arial, Helvetica, sans-serif;
+  background: #0f172a;
+  color: #fff;
+}
+
+.main {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  gap: 1rem;
+  text-align: center;
+  padding: 2rem;
+}
+
+.main h1 {
+  font-size: clamp(2rem, 5vw, 3.5rem);
+}
+
+.main p {
+  font-size: 1.2rem;
+  color: #cbd5e1;
+}
+
+.main span {
+  color: #94a3b8;
+  font-size: 0.95rem;
+}
