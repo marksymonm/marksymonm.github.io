@@ -365,6 +365,7 @@ body {
     grid-template-columns: 1fr;
     gap: 20px;
     padding: 10vh 6vw 5vh;
+    overflow: hidden;
   }
   .hero-lanyard {
     order: -1;

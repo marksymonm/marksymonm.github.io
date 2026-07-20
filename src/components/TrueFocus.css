@@ -6,7 +6,6 @@
   align-items: center;
   flex-wrap: wrap;
   outline: none;
-  user-select: none;
 }
 
 .focus-word {
@@ -18,7 +17,6 @@
     filter 0.3s ease,
     color 0.3s ease;
   outline: none;
-  user-select: none;
 }
 
 .focus-word.active {
