@@ -1,0 +1,161 @@
+.preloader {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  background: var(--ink);
+  overflow: hidden;
+}
+
+.preloader-glitch-bg {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+}
+
+/* ======================================
+   CONTENT
+====================================== */
+
+.preloader-welcome {
+  position: absolute;
+  inset: 0;
+  z-index: 3;
+
+  display: flex;
+  justify-content: center;
+  align-items: center;
+
+  color: var(--paper);
+}
+
+.preloader-fade {
+  animation: preloaderFade 0.7s ease forwards;
+}
+
+/* ======================================
+   TERMINAL
+====================================== */
+
+.terminal {
+  width: 380px;
+  max-width: 90%;
+
+  font-family: var(--font-mono);
+  font-size: 15px;
+  line-height: 1.9;
+  color: var(--paper);
+}
+
+.terminal p {
+  margin: 0;
+  opacity: 0;
+  transform: translateY(8px);
+
+  animation: terminalLine 0.45s ease forwards;
+}
+
+.terminal p:nth-child(1) {
+  animation-delay: 0.1s;
+}
+
+.terminal p:nth-child(2) {
+  animation-delay: 0.4s;
+}
+
+.terminal p:nth-child(3) {
+  animation-delay: 0.7s;
+}
+
+.terminal p:nth-child(4) {
+  animation-delay: 1s;
+}
+
+.terminal p:nth-child(5) {
+  animation-delay: 1.3s;
+}
+
+.terminal-ready {
+  color: var(--red);
+}
+
+/* ======================================
+   TYPING TITLE
+====================================== */
+
+.typing-title {
+  margin: 0;
+
+  display: inline-block;
+  overflow: hidden;
+  white-space: nowrap;
+
+  width: 0;
+
+  font-family: var(--font-mono);
+  font-size: clamp(15px, 3vw, 25px);
+  font-weight: 600;
+
+  color: var(--paper);
+
+  letter-spacing: 2px;
+
+  border-right: 2px solid #ffffff;
+
+  animation:
+    typing 1.8s steps(27, end) forwards,
+    cursor 0.7s step-end infinite;
+}
+
+/* Used during fade phase */
+.typed {
+  width: 27ch;
+  border-right: 2px solid #ffffff;
+  animation: cursor 0.7s step-end infinite;
+}
+
+/* ======================================
+   ANIMATIONS
+====================================== */
+
+@keyframes terminalLine {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes typing {
+  from {
+    width: 0;
+  }
+
+  to {
+    width: 27ch;
+  }
+}
+
+@keyframes cursor {
+  0%,
+  100% {
+    border-color: #ffffff;
+  }
+
+  50% {
+    border-color: transparent;
+  }
+}
+
+@keyframes preloaderFade {
+  from {
+    opacity: 1;
+  }
+
+  to {
+    opacity: 0;
+  }
+}

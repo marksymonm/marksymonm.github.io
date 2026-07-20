@@ -1,10 +1,11 @@
-import { useState } from "react";
-import "./App.css";
+import { useEffect, useRef, useState } from "react";import "./App.css";
+import Preloader from "./components/Preloader";
 import Navbar from "./components/Navbar";
 import ScrollVelocity from "./components/ScrollVelocity";
 import Lanyard from "./components/Lanyard";
 import TextType from "./components/TextType";
 import AboutVisual, { ABOUT_VISUAL_LABELS } from "./components/AboutVisual";
+import Aurora from "./components/Aurora";
 
 import { Mail } from "lucide-react";
 
@@ -134,272 +135,466 @@ const AFFILIATIONS = [
 ];
 
 function App() {
+
+  useEffect(() => {
+    // Disable browser's automatic scroll restoration
+    if ("scrollRestoration" in window.history) {
+      window.history.scrollRestoration = "manual";
+    }
+    window.scrollTo(0, 0);
+  }, []);
+  
+  const [loading, setLoading] = useState(true);
+
   const [activeVisual, setActiveVisual] = useState(0);
 
+  const [heroEntered, setHeroEntered] = useState(false);
+
+  const heroRef = useRef<HTMLElement>(null);
+  const [heroScrollStyle, setHeroScrollStyle] = useState<React.CSSProperties>({});
+
+  useEffect(() => {
+    const heroEl = heroRef.current;
+    if (!heroEl) return;
+
+    let ticking = false;
+
+    const updateHeroFade = () => {
+      const heroHeight = heroEl.offsetHeight;
+      const scrollY = window.scrollY;
+
+      // Fade fully out by the time you've scrolled one hero-height
+      const progress = Math.min(Math.max(scrollY / heroHeight, 0), 1);
+      const opacity = 1 - progress;
+      const translateY = progress * -60; // px, moves up as it fades
+
+      setHeroScrollStyle({
+        opacity,
+        transform: `translateY(${translateY}px)`,
+        pointerEvents: progress > 0.85 ? "none" : "auto",
+      });
+
+      ticking = false;
+    };
+
+    const onScroll = () => {
+      if (!ticking) {
+        requestAnimationFrame(updateHeroFade);
+        ticking = true;
+      }
+    };
+
+    updateHeroFade(); // set initial state
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => window.removeEventListener("scroll", onScroll);
+  }, []);
+
+  const aboutVisualRef = useRef<HTMLDivElement>(null);
+  const aboutTextRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const targets = [aboutVisualRef.current, aboutTextRef.current].filter(
+      (el): el is HTMLDivElement => el !== null
+    );
+    if (targets.length === 0) return;
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            entry.target.classList.add("in-view");
+          } else {
+            entry.target.classList.remove("in-view");
+          }
+        });
+      },
+      { threshold: 0.25 }
+    );
+
+    targets.forEach((el) => observer.observe(el));
+    return () => observer.disconnect();
+  }, []);
+
+  const skillsRef = useRef<HTMLElement>(null);
+
+  useEffect(() => {
+    const el = skillsRef.current;
+    if (!el) return;
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          entry.target.classList.toggle("in-view", entry.isIntersecting);
+        });
+      },
+      { threshold: 0.15 }
+    );
+
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, []);
+
+  const backgroundRef = useRef<HTMLElement>(null);
+
+  useEffect(() => {
+    const el = backgroundRef.current;
+    if (!el) return;
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          entry.target.classList.toggle("in-view", entry.isIntersecting);
+        });
+      },
+      { threshold: 0.12 }
+    );
+
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, []);
+
+  useEffect(() => {
+    document.body.style.overflow = loading ? "hidden" : "";
+    return () => {
+      document.body.style.overflow = "";
+    };
+  }, [loading]);
+
   return (
-    <main className="main">
-      <Navbar />
+    <>
+      {loading && (
+        <Preloader
+          onComplete={() => {
+            window.scrollTo(0, 0);
+            setLoading(false);
+          }}
+        />
+      )}
+      <main className="main">
+        <Navbar />
 
-      {/* Hero Section */}
-      <section className="hero">
-        <div className="hero-inner">
-          <p className="eyebrow">HELLO I AM</p>
-
-          <h1 className="name">
-            MARK SYMON
-            <br />
-            MARTINEZ
-          </h1>
-
-          <div className="roles">
-            <TextType
-              className="roles-text"
-              as="span"
-              text={ROLES}
-              typingSpeed={70}
-              deletingSpeed={40}
-              pauseDuration={1400}
-              initialDelay={300}
-              loop
-              showCursor
-              cursorCharacter="|"
-              cursorClassName="roles-cursor"
-              cursorBlinkDuration={0.5}
+        {/* Hero Section */}
+        <section className="hero" id="home" ref={heroRef}>
+          <div className="hero-aurora-bg">
+            <Aurora
+              colorStops={["#e60909", "#f7f7f7", "#373737"]}
+              blend={0.45}
+              amplitude={1.0}
+              speed={0.5}
             />
           </div>
 
-          <div className="socials">
-            {SOCIALS.map(({ icon: Icon, label, href }) => (
-              <button
-                key={label}
-                type="button"
-                onClick={() =>
-                  window.open(
-                    href,
-                    href.startsWith("mailto:") ? "_self" : "_blank",
-                    "noopener,noreferrer"
-                  )
-                }
-                className="social-link"
-              >
-                <Icon size={20} />
-                <span className="social-tooltip">{label}</span>
-              </button>
-            ))}
-            <button
-              type="button"
-              onClick={() => {
-                const link = document.createElement("a");
-                link.href = "/Mark-Symon-Martinez-Resume.pdf";
-                link.download = "Mark-Symon-Martinez-Resume.pdf";
-                link.click();
-              }}
-              className="resume-btn"
+          {!loading && (
+            <div
+              className={`hero-inner${!heroEntered ? " hero-anim delay-1" : ""}`}
+              style={heroEntered ? heroScrollStyle : undefined}
+              onAnimationEnd={() => setHeroEntered(true)}
             >
-              Download Resume
-            </button>
-          </div>
-        </div>
+              <p className="eyebrow hero-anim delay-1">HELLO I AM</p>
 
-        <div className="hero-lanyard">
-          <Lanyard
-            position={[0, 0, 14]}
-            gravity={[0, -40, 0]}
-            frontImage="/images/card-front.png"
-            backImage="/images/card-back.jpg"
-            imageFit="cover"
+              <h1 className="name hero-anim delay-2">
+                MARK SYMON
+                <br />
+                MARTINEZ
+              </h1>
+
+              <div className="roles hero-anim delay-3">
+                <TextType
+                  className="roles-text"
+                  as="span"
+                  text={ROLES}
+                  typingSpeed={70}
+                  deletingSpeed={40}
+                  pauseDuration={1400}
+                  initialDelay={300}
+                  loop
+                  showCursor
+                  cursorCharacter="|"
+                  cursorClassName="roles-cursor"
+                  cursorBlinkDuration={0.5}
+                />
+              </div>
+
+              <div className="socials hero-anim delay-4">
+                {SOCIALS.map(({ icon: Icon, label, href }) => (
+                  <button
+                    key={label}
+                    type="button"
+                    onClick={() =>
+                      window.open(
+                        href,
+                        href.startsWith("mailto:") ? "_self" : "_blank",
+                        "noopener,noreferrer"
+                      )
+                    }
+                    className="social-link"
+                  >
+                    <Icon size={20} />
+                    <span className="social-tooltip">{label}</span>
+                  </button>
+                ))}
+                <button
+                  type="button"
+                  onClick={() => {
+                    const link = document.createElement("a");
+                    link.href = "/Mark-Symon-Martinez-Resume.pdf";
+                    link.download = "Mark-Symon-Martinez-Resume.pdf";
+                    link.click();
+                  }}
+                  className="resume-btn"
+                >
+                  Download My Resume
+                </button>
+              </div>
+            </div>
+          )}
+
+          {!loading && (
+            <div
+              className={`hero-lanyard${!heroEntered ? " hero-anim" : ""}`}
+              style={heroEntered ? heroScrollStyle : undefined}
+              onAnimationEnd={() => setHeroEntered(true)}
+            >
+              <Lanyard
+                position={[0, 0, 14]}
+                gravity={[0, -40, 0]}
+                frontImage="/images/card-front.png"
+                backImage="/images/card-back.jpg"
+                imageFit="cover"
+              />
+            </div>
+          )}
+        </section>
+
+        <div className="ticker">
+          <ScrollVelocity
+            texts={["BEHIND THE CODE", "BEHIND THE CODE"]}
+            velocity={100}
+            className="ticker-text"
+            numCopies={100}
+            damping={50}
+            stiffness={400}
           />
         </div>
-      </section>
 
-      <div className="ticker">
-        <ScrollVelocity
-          texts={["BEHIND THE CODE", "BEHIND THE CODE"]}
-          velocity={100}
-          className="ticker-text"
-          numCopies={100}
-          damping={50}
-          stiffness={400}
-        />
-      </div>
+        {/* About Me section */}
+        <section className="about" id="about">
+          <div className="about-grid">
+            <div className="about-visual-col" ref={aboutVisualRef}>
+              <h2 className="about-heading">ABOUT ME</h2>
 
-      {/* About Me section */}
-      <section className="about" id="about">
-        <div className="about-grid">
-          <div className="about-visual-col">
-            <h2 className="about-heading">ABOUT ME</h2>
-
-            <div className="about-visual">
-              <div className="about-visual-canvas">
-                <AboutVisual onActiveChange={setActiveVisual} />
+              <div className="about-visual">
+                <div className="about-visual-canvas">
+                  <AboutVisual onActiveChange={setActiveVisual} />
+                </div>
+                <div className="about-visual-labels">
+                  {ABOUT_VISUAL_LABELS.map((label, i) => (
+                    <span key={label} className={i === activeVisual ? "active" : ""}>
+                      {label}
+                    </span>
+                  ))}
+                </div>
               </div>
-              <div className="about-visual-labels">
-                {ABOUT_VISUAL_LABELS.map((label, i) => (
-                  <span key={label} className={i === activeVisual ? "active" : ""}>
-                    {label}
+            </div>
+
+            <div className="about-text" ref={aboutTextRef}>
+              <p>
+                I'm Mark Symon Martinez, a graduating student pursuing a
+                Bachelor of Engineering Technology, major in Computer
+                Engineering Technology, at the Technological University of the
+                Philippines – Cavite.
+                <br />
+                <br />
+                I'm passionate about building modern, user-friendly web
+                applications that combine clean design with reliable
+                functionality. I enjoy transforming ideas into intuitive
+                digital experiences through thoughtful UI/UX design and
+                efficient development.
+                <br />
+                <br />
+                Beyond coding, I have a strong interest in graphic design and
+                creating visually engaging interfaces. I believe great software
+                should be both functional and enjoyable to use, and I'm always
+                eager to learn new technologies, sharpen my skills, and take on
+                new challenges that help me grow as a developer.
+              </p>
+
+              <div className="about-hobbies">
+                <h3>HOBBIES</h3>
+                <ul className="about-hobbies-list">
+                  {HOBBIES.map((hobby) => (
+                    <li key={hobby}>{hobby}</li>
+                  ))}
+                </ul>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        {/* Skills section */}
+        <section className="skills" id="skills" ref={skillsRef}>
+          <h2 className="skills-heading">
+            {"SKILLS".split("").map((ch, i) => (
+              <span
+                key={i}
+                className="skills-heading-letter"
+                style={{ "--i": i } as React.CSSProperties}
+              >
+                {ch}
+              </span>
+            ))}
+          </h2>
+
+          <div className="skill-cards">
+            {SKILLS.map(({ icon: Icon, name, desc, color }, i) => {
+              const angle = (i * 47) % 360;
+              const dist = 90 + (i % 5) * 18;
+              const rad = (angle * Math.PI) / 180;
+              const dx = Math.cos(rad) * dist;
+              const dy = Math.sin(rad) * dist;
+              const rot = (i % 2 === 0 ? 1 : -1) * (18 + (i % 4) * 14);
+
+              return (
+                <div
+                  className="skill-card"
+                  key={name}
+                  style={{
+                    "--dx": `${dx}px`,
+                    "--dy": `${dy}px`,
+                    "--rot": `${rot}deg`,
+                    "--delay": `${(i % 8) * 0.05}s`,
+                  } as React.CSSProperties}
+                >
+                  <div className="skill-card-inner">
+                    <div className="skill-card-front">
+                      <Icon size={32} style={{ color }} />
+                      <span>{name}</span>
+                    </div>
+                    <div className="skill-card-back">
+                      <p>{desc}</p>
+                    </div>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+
+          {/* <div className="skills-personal">
+            <p className="skills-personal-label">PERSONAL SKILLS</p>
+            <div className="skills-marquee">
+              <div className="skills-marquee-track">
+                {[...PERSONAL_SKILLS, ...PERSONAL_SKILLS].map((skill, i) => (
+                  <span className="skills-marquee-item" key={`${skill}-${i}`}>
+                    {skill} <span className="skills-marquee-dot">●</span>
                   </span>
                 ))}
               </div>
             </div>
+          </div> */}
+        </section>
+
+        {/* Projects section */}
+        <section className="projects" id="portfolio">
+          <h2 className="projects-heading">PORTFOLIO</h2>
+
+          <div className="projects-wip">
+            <div className="wip-stripe" />
+            <div className="wip-content">
+              <span className="wip-tag">STATUS: IN PROGRESS</span>
+              <h3 className="wip-title">
+                BUILDING
+                <br />
+                SOMETHING
+                <br />
+                COOL
+              </h3>
+              <p className="wip-desc">
+                This section is currently under construction. Check back soon
+                for a full showcase of my work.
+              </p>
+            </div>
+            <div className="wip-stripe" />
           </div>
+        </section>
 
-          <div className="about-text">
-            <p>
-              I'm Mark Symon Martinez, a graduating student pursuing a
-              Bachelor of Engineering Technology, major in Computer
-              Engineering Technology, at the Technological University of the
-              Philippines – Cavite.
-              <br />
-              <br />
-              I'm passionate about building modern, user-friendly web
-              applications that combine clean design with reliable
-              functionality. I enjoy transforming ideas into intuitive
-              digital experiences through thoughtful UI/UX design and
-              efficient development.
-              <br />
-              <br />
-              Beyond coding, I have a strong interest in graphic design and
-              creating visually engaging interfaces. I believe great software
-              should be both functional and enjoyable to use, and I'm always
-              eager to learn new technologies, sharpen my skills, and take on
-              new challenges that help me grow as a developer.
-            </p>
+        {/* Background section */}
+        <section className="background" id="background" ref={backgroundRef}>
+          <h2 className="background-heading">BACKGROUND</h2>
 
-            <div className="about-hobbies">
-              <h3>HOBBIES</h3>
-              <ul className="about-hobbies-list">
-                {HOBBIES.map((hobby) => (
-                  <li key={hobby}>{hobby}</li>
+          <div className="background-grid">
+            {/* Education */}
+            <div className="background-col">
+              <h3 className="background-col-title">
+                <span className="background-col-dot" />
+                EDUCATION
+              </h3>
+              <div className="timeline">
+                {EDUCATION.map((edu, i) => (
+                  <div
+                    className="timeline-item"
+                    key={edu.school}
+                    style={{ "--i": i } as React.CSSProperties}
+                  >
+                    <span className="timeline-date">{edu.date}</span>
+                    <h4 className="timeline-title">{edu.school}</h4>
+                    <p className="timeline-detail">{edu.detail}</p>
+                  </div>
                 ))}
-              </ul>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* Skills section */}
-      <section className="skills" id="skills">
-        <h2 className="skills-heading">SKILLS</h2>
-
-        <div className="skill-cards">
-          {SKILLS.map(({ icon: Icon, name, desc, color }) => (
-            <div className="skill-card" key={name}>
-              <div className="skill-card-inner">
-                <div className="skill-card-front">
-                  <Icon size={32} style={{ color }} />
-                  <span>{name}</span>
-                </div>
-                <div className="skill-card-back">
-                  <p>{desc}</p>
-                </div>
               </div>
             </div>
-          ))}
-        </div>
 
-        <div className="skills-personal">
-          <p className="skills-personal-label">PERSONAL SKILLS</p>
-          <div className="skills-marquee">
-            <div className="skills-marquee-track">
-              {[...PERSONAL_SKILLS, ...PERSONAL_SKILLS].map((skill, i) => (
-                <span className="skills-marquee-item" key={`${skill}-${i}`}>
-                  {skill} <span className="skills-marquee-dot">●</span>
-                </span>
-              ))}
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* Projects section */}
-      <section className="projects" id="projects">
-        <h2 className="projects-heading">PORTFOLIO</h2>
-
-        <div className="projects-wip">
-          <div className="wip-stripe" />
-          <div className="wip-content">
-            <span className="wip-tag">STATUS: IN PROGRESS</span>
-            <h3 className="wip-title">
-              BUILDING
-              <br />
-              SOMETHING
-              <br />
-              COOL
-            </h3>
-            <p className="wip-desc">
-              This section is currently under construction. Check back soon
-              for a full showcase of my work.
-            </p>
-          </div>
-          <div className="wip-stripe" />
-        </div>
-      </section>
-
-      {/* Background section */}
-      <section className="background" id="background">
-        <h2 className="background-heading">BACKGROUND</h2>
-
-        <div className="background-grid">
-          {/* Education */}
-          <div className="background-col">
-            <h3 className="background-col-title">
-              <span className="background-col-dot" />
-              EDUCATION
-            </h3>
-            <div className="timeline">
-              {EDUCATION.map((edu) => (
-                <div className="timeline-item" key={edu.school}>
-                  <span className="timeline-date">{edu.date}</span>
-                  <h4 className="timeline-title">{edu.school}</h4>
-                  <p className="timeline-detail">{edu.detail}</p>
-                </div>
-              ))}
-            </div>
-          </div>
-
-          {/* Experience */}
-          <div className="background-col">
-            <h3 className="background-col-title">
-              <span className="background-col-dot" />
-              EXPERIENCE
-            </h3>
-            <div className="timeline">
-              {EXPERIENCE.map((exp) => (
-                <div className="timeline-item" key={exp.role}>
-                  <span className="timeline-date">{exp.date}</span>
-                  <h4 className="timeline-title">{exp.role}</h4>
-                  <p className="timeline-sub">
-                    {exp.company} — {exp.location}
-                  </p>
-                  <p className="timeline-detail">{exp.detail}</p>
-                </div>
-              ))}
-            </div>
-          </div>
-        </div>
-
-        {/* Affiliations */}
-        <div className="affiliations">
-          <h3 className="background-col-title affiliations-title">
-            <span className="background-col-dot" />
-            AFFILIATIONS
-          </h3>
-          <div className="affiliations-grid">
-            {AFFILIATIONS.map((aff) => (
-              <div className="affiliation-card" key={aff.org}>
-                <h4>{aff.org}</h4>
-                <ul>
-                  {aff.roles.map((role) => (
-                    <li key={role}>{role}</li>
-                  ))}
-                </ul>
+            {/* Experience */}
+            <div className="background-col">
+              <h3 className="background-col-title">
+                <span className="background-col-dot" />
+                EXPERIENCE
+              </h3>
+              <div className="timeline">
+                {EXPERIENCE.map((exp, i) => (
+                  <div
+                    className="timeline-item"
+                    key={exp.role}
+                    style={{ "--i": i } as React.CSSProperties}
+                  >
+                    <span className="timeline-date">{exp.date}</span>
+                    <h4 className="timeline-title">{exp.role}</h4>
+                    <p className="timeline-sub">
+                      {exp.company} — {exp.location}
+                    </p>
+                    <p className="timeline-detail">{exp.detail}</p>
+                  </div>
+                ))}
               </div>
-            ))}
+            </div>
           </div>
-        </div>
-      </section>
-      
-    </main>
+
+          {/* Affiliations */}
+          <div className="affiliations">
+            <h3 className="background-col-title affiliations-title">
+              <span className="background-col-dot" />
+              AFFILIATIONS
+            </h3>
+            <div className="affiliations-grid">
+              {AFFILIATIONS.map((aff, i) => (
+                <div
+                  className="affiliation-card"
+                  key={aff.org}
+                  style={{ "--i": i } as React.CSSProperties}
+                >
+                  <h4>{aff.org}</h4>
+                  <ul>
+                    {aff.roles.map((role) => (
+                      <li key={role}>{role}</li>
+                    ))}
+                  </ul>
+                </div>
+              ))}
+            </div>
+          </div>
+        </section>
+        
+      </main>
+    </>
   );
 }
 
