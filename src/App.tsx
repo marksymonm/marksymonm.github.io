@@ -41,16 +41,16 @@ const SKILLS = [
   { icon: FaImage, name: "Photoshop", desc: "Image editing", color: "#31A8FF" },
 ];
 
-const PERSONAL_SKILLS = [
-  "Leadership",
-  "Team Collaboration",
-  "Communication",
-  "Organizational Skills",
-  "Attention to Detail",
-  "Problem Solving",
-  "Analytical Thinking",
-  "Time Management",
-];
+// const PERSONAL_SKILLS = [
+//   "Leadership",
+//   "Team Collaboration",
+//   "Communication",
+//   "Organizational Skills",
+//   "Attention to Detail",
+//   "Problem Solving",
+//   "Analytical Thinking",
+//   "Time Management",
+// ];
 
 // Github at LinkedIn icons — inline SVG dahil tinanggal na
 // yung brand/logo icons sa lucide-react
