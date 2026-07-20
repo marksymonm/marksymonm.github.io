@@ -3,7 +3,7 @@ import { Canvas, useFrame } from "@react-three/fiber";
 import * as THREE from "three";
 
 export const ABOUT_VISUAL_LABELS = [
-  "THINGS I LIKE"
+  "  "
 ];
 
 // Solid mesh + slightly-scaled wireframe overlay = the "raw blueprint" edge
