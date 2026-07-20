@@ -1,0 +1,139 @@
+.navbar-wrap {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 50;
+  padding: 0;
+  pointer-events: none;
+}
+
+.navbar {
+  --glow-x: 50%;
+  --glow-y: 50%;
+
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  padding: 16px 40px;
+  pointer-events: auto;
+
+  background: transparent;
+  border-bottom: 1px solid transparent;
+  -webkit-backdrop-filter: none;
+  backdrop-filter: none;
+  box-shadow: none;
+
+  transition: background 0.3s ease, backdrop-filter 0.3s ease,
+    border-color 0.3s ease, box-shadow 0.3s ease, padding 0.3s ease;
+
+  overflow: hidden;
+}
+
+/* Blur/glass only appears once the page has scrolled */
+.navbar-wrap.is-scrolled .navbar {
+  padding: 3px 40px;
+  background: rgba(20, 20, 22, 0.45);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.411);
+  -webkit-backdrop-filter: blur(18px) saturate(140%);
+  backdrop-filter: blur(25px) saturate(140%);
+  box-shadow:
+    0 8px 32px rgba(0, 0, 0, 0.35),
+    inset 0 1px 0 rgba(255, 255, 255, 0.06);
+}
+
+/* Cursor-reactive glow, echoes the aurora red */
+.navbar::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(
+    220px 100px at var(--glow-x) var(--glow-y),
+    rgba(255, 1, 1, 0.16),
+    transparent 70%
+  );
+  opacity: 0;
+  transition: opacity 0.25s ease;
+  pointer-events: none;
+}
+
+.navbar-wrap.is-scrolled .navbar:hover::before {
+  opacity: 1;
+}
+
+.navbar-logo {
+  position: relative;
+  display: flex;
+  align-items: center;
+  flex-shrink: 0;
+}
+
+.navbar-logo-img {
+  height: 65px;
+  width: auto;
+  display: block;
+}
+
+.navbar-links {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.navbar-links a {
+  position: relative;
+  display: inline-block;
+  padding: 8px 16px;
+  border-radius: 999px;
+  font-size: 14px;
+  font-weight: 500;
+  letter-spacing: 0.04em;
+  color: rgba(255, 255, 255, 0.65);
+  text-decoration: none;
+  transition: color 0.2s ease, background 0.2s ease;
+  white-space: nowrap;
+}
+
+.navbar-links a:hover {
+  color: #ffffff;
+  background: rgba(255, 255, 255, 0.06);
+}
+
+.navbar-links a.is-active {
+  color: #ffffff;
+  background: rgba(255, 1, 1, 0.14);
+  box-shadow: inset 0 0 0 1px rgba(255, 1, 1, 0.35);
+}
+
+/* Mobile */
+@media (max-width: 640px) {
+  .navbar {
+    padding: 12px 20px;
+  }
+
+  .navbar-wrap.is-scrolled .navbar {
+    padding: 10px 20px;
+  }
+
+  .navbar-links {
+    gap: 0;
+  }
+
+  .navbar-links a {
+    padding: 7px 10px;
+    font-size: 12px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .navbar,
+  .navbar::before {
+    transition: none;
+  }
+}
