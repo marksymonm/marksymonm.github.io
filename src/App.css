@@ -52,6 +52,7 @@ body {
   z-index: 0;
   pointer-events: none;
   overflow: hidden;
+  opacity: 15%;
 }
 
 .hero-inner {

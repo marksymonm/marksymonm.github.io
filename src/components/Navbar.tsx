@@ -136,7 +136,7 @@ function Navbar() {
                   />
                 )}
 
-                <span>{link.label}</span>
+                <span className="navbar-link-label">{link.label}</span>
               </a>
             </li>
           ))}
@@ -191,7 +191,7 @@ function Navbar() {
                   />
                 )}
 
-                <span>{link.label}</span>
+                <span className="navbar-mobile-link-label">{link.label}</span>
               </a>
             </li>
           ))}

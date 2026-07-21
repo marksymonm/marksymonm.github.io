@@ -6,7 +6,7 @@ import Lanyard from "./components/Lanyard";
 import TextType from "./components/TextType";
 import AboutVisual, { ABOUT_VISUAL_LABELS } from "./components/AboutVisual";
 import Aurora from "./components/Aurora";
-
+import Portfolio from "./components/Portfolio";
 import { Mail } from "lucide-react";
 
 import {
@@ -494,25 +494,7 @@ function App() {
         {/* Projects section */}
         <section className="projects" id="portfolio">
           <h2 className="projects-heading">PORTFOLIO</h2>
-
-          <div className="projects-wip">
-            <div className="wip-stripe" />
-            <div className="wip-content">
-              <span className="wip-tag">STATUS: IN PROGRESS</span>
-              <h3 className="wip-title">
-                BUILDING
-                <br />
-                SOMETHING
-                <br />
-                COOL
-              </h3>
-              <p className="wip-desc">
-                This section is currently under construction. Check back soon
-                for a full showcase of my work.
-              </p>
-            </div>
-            <div className="wip-stripe" />
-          </div>
+          <Portfolio />
         </section>
 
         {/* Background section */}
